@@ -1,0 +1,36 @@
+name: CD
+run-name: ${{github.actor}} is running ${{github.workflow}} on ${{github.repository}}
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  publish:
+    name: Publish with Node.js v${{matrix.node}} on ${{matrix.os}}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+        node:
+          # See https://github.com/nodejs/release#release-schedule for details
+          - 20.x # LTS
+    runs-on: ${{matrix.os}}
+    steps:
+    - name: ☁️ - Checkout
+      uses: actions/checkout@v4
+    - name: 🔧 - Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x # LTS
+        registry-url: https://registry.npmjs.org
+    - name: 📦 - Run "npm ci"
+      run: npm ci
+    - name: 🏗️ - Run "npm run build"
+      run: npm run build
+    - name: 🚀 - Run "npm publish"
+      run: npm publish
+      env:
+        NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
